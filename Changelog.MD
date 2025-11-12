@@ -1,4 +1,4 @@
-📜 Changelog – Version 1.3.0  
+📜 Changelog – Version 1.3.0-Beta  
 📅 Release Date: 12-11-2025  
   
 🛠️ Changes & Improvements:  
