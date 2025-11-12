@@ -3,6 +3,16 @@
 
 local f = CreateFrame("Frame")
 
+-- SavedVars (add `## SavedVariables: PixelPerfectUIScaleDB` to your .toc)
+PixelPerfectUIScaleDB = PixelPerfectUIScaleDB or {}
+local function getModifier()
+  local m = tonumber(PixelPerfectUIScaleDB.modifier or 1) or 1
+  -- sanity clamp so people don't go wild
+  if m < 0.5 then m = 0.5 elseif m > 3.0 then m = 3.0 end
+  PixelPerfectUIScaleDB.modifier = m
+  return m
+end
+
 -- Settings
 local THROTTLE_SEC = 0.5
 local TOLERANCE    = 0.02
@@ -41,31 +51,55 @@ end
 -- Slash command
 SLASH_PIXELPERFECTUISCALE1 = "/ppscale"
 SlashCmdList.PIXELPERFECTUISCALE = function(msg)
-  msg = (msg or ""):lower()
+  msg = (msg or ""):lower():gsub("^%s+", ""):gsub("%s+$", "")
   if msg == "debug" then
     PixelPerfectUIScale_Debug = not PixelPerfectUIScale_Debug
     print("PPScale debug:", PixelPerfectUIScale_Debug and "ON" or "OFF")
+
   elseif msg == "now" then
     PixelPerfectUIScale_Apply(true)
+
   elseif msg == "status" then
-    local want = (function() local _,h=GetPhysicalScreenSize() if h and h>0 then return 768/h end end)()
+    local _, h = GetPhysicalScreenSize()
+    local base = (h and h > 0) and (768 / h) or nil
+    local mod  = getModifier()
+    local want = base and (base * mod) or nil
     local have = UIParent:GetScale()
-    print(string.format("PPScale status: want %.5f, have %.5f, CVars %s",
-      want or -1, have or -1, TOUCH_CVARS and "ON" or "OFF"))
+    print(string.format("PPScale status: base %.5f × mod %.2f = want %.5f, have %.5f, CVars %s",
+      base or -1, mod, want or -1, have or -1, TOUCH_CVARS and "ON" or "OFF"))
+
+  elseif msg:match("^modifier%s") then
+    local num = msg:match("^modifier%s+([%d%.]+)")
+    if num then
+      local m = tonumber(num)
+      if m and m > 0 then
+        PixelPerfectUIScaleDB.modifier = m
+        print(string.format("PPScale modifier set to %.2f (clamped to %.2f if needed).", m, getModifier()))
+        PixelPerfectUIScale_Apply(true)
+      else
+        print("PPScale: invalid number. Usage: /ppscale modifier 1.25")
+      end
+    elseif msg:match("^modifier$") then
+      print(string.format("PPScale modifier is %.2f. Usage: /ppscale modifier <number>  (0.5–3.0)", getModifier()))
+    end
+
   elseif msg == "cvars on" then
     TOUCH_CVARS = true
     print("PPScale: TOUCH_CVARS set to ON.")
+
   elseif msg == "cvars off" then
     TOUCH_CVARS = false
     print("PPScale: TOUCH_CVARS set to OFF.")
+
   else
-    print("/ppscale debug     - toggle verbose logging")
-    print("/ppscale now       - force reapply immediately")
-    print("/ppscale status    - show desired vs current scale")
-    print("/ppscale cvars on  - allow writing uiScale/useUiScale CVars")
-    print("/ppscale cvars off - do not write CVars")
+    print("/ppscale debug          - toggle verbose logging")
+    print("/ppscale now            - force reapply immediately")
+    print("/ppscale status         - show desired vs current scale")
+    print("/ppscale modifier <n>   - multiply 768/h by <n> (e.g. 1.25). Range 0.5–3.0")
+    print("/ppscale cvars on|off   - allow/deny writing uiScale/useUiScale CVars")
   end
 end
+
 
 -- Helpers
 local function isSimilar(a, b)
@@ -75,7 +109,7 @@ end
 local function desiredScale()
   local _, h = GetPhysicalScreenSize()
   if not h or h == 0 then return nil end
-  return 768 / h
+  return (768 / h) * getModifier()
 end
 
 local throttleUntil = 0
@@ -92,6 +126,7 @@ if InCombatLockdown() then
   pending = true
   return
 end
+
 
   local want = desiredScale()
   if not want then
@@ -159,4 +194,3 @@ f:SetScript("OnEvent", function(self, event)
     PixelPerfectUIScale_Apply(false)
   end)
 end)
-
