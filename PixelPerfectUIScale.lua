@@ -84,11 +84,14 @@ local pending = false
 function PixelPerfectUIScale_Apply(force)
   pending = false
 
-  if InCombatLockdown() then
-    dprint("In combat; deferring")
-    pending = true
-    return
+if InCombatLockdown() then
+  if DEFAULT_CHAT_FRAME and DEFAULT_CHAT_FRAME.AddMessage then
+    DEFAULT_CHAT_FRAME:AddMessage("|cffff7f00[PPScale]|r UI scale update deferred until after combat.")
   end
+  dprint("In combat; deferring")
+  pending = true
+  return
+end
 
   local want = desiredScale()
   if not want then
@@ -156,3 +159,4 @@ f:SetScript("OnEvent", function(self, event)
     PixelPerfectUIScale_Apply(false)
   end)
 end)
+
