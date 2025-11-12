@@ -3,7 +3,7 @@
 
 local f = CreateFrame("Frame")
 
--- SavedVars (add `## SavedVariables: PixelPerfectUIScaleDB` to your .toc)
+-- Added modifier support
 PixelPerfectUIScaleDB = PixelPerfectUIScaleDB or {}
 local function getModifier()
   local m = tonumber(PixelPerfectUIScaleDB.modifier or 1) or 1
@@ -194,3 +194,4 @@ f:SetScript("OnEvent", function(self, event)
     PixelPerfectUIScale_Apply(false)
   end)
 end)
+
