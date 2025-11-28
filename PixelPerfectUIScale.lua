@@ -1,4 +1,3 @@
--- PixelPerfectUIScale v1.2.0
 -- Enforces a pixel-perfect UI scale (768 / physical screen height).
 
 local f = CreateFrame("Frame")
@@ -211,5 +210,6 @@ f:SetScript("OnEvent", function(self, event)
     PixelPerfectUIScale_Apply(false)
   end)
 end)
+
 
 
