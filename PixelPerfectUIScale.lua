@@ -24,7 +24,7 @@ local EVENTS = {
   "PLAYER_ENTERING_WORLD",
   "DISPLAY_SIZE_CHANGED",
   "UI_SCALE_CHANGED",
-  "EDIT_MODE_LAYOUTS_UPDATED",
+  -- "EDIT_MODE_LAYOUTS_UPDATED", -- disabled: breaks Edit Mode snap-to-elements
   "PLAYER_REGEN_ENABLED",
 }
 
@@ -115,8 +115,25 @@ end
 local throttleUntil = 0
 local pending = false
 
+local function IsEditModeActive()
+  if EditModeManagerFrame and EditModeManagerFrame.editModeActive then
+    return EditModeManagerFrame.editModeActive
+  end
+  if C_EditMode and C_EditMode.IsEditModeActive then
+    return C_EditMode.IsEditModeActive()
+  end
+  return false
+end
+
 function PixelPerfectUIScale_Apply(force)
   pending = false
+
+  -- Don’t fight Edit Mode while the user is dragging things around
+  if IsEditModeActive() then
+    dprint("Edit Mode active; deferring scale apply")
+    pending = true
+    return
+  end
 
 if InCombatLockdown() then
   if DEFAULT_CHAT_FRAME and DEFAULT_CHAT_FRAME.AddMessage then
@@ -194,4 +211,5 @@ f:SetScript("OnEvent", function(self, event)
     PixelPerfectUIScale_Apply(false)
   end)
 end)
+
 
