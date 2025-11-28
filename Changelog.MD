@@ -1,27 +1,15 @@
-📜 Changelog – Version 1.3.0-Beta  
-📅 Release Date: 12-11-2025  
+📜 Changelog – Version 1.3.1-Beta  
+📅 Release Date: 28-11-2025  
   
 🛠️ Changes & Improvements:  
   
-✅ New Slash Command:  
-Added /ppscale modifier <number> to customize your personal scale multiplier.  
-Example: /ppscale modifier 1.5  
-Useful for 4K and ultrawide displays where the default 768 / height scale appears too small.  
-Supports values from 0.5× to 3.0×.  
-Setting is saved between sessions.  
+✅ Fixed  
+Resolved an issue where Edit Mode’s *snap to elements* feature stopped working while the addon was enabled.  
+  The addon was listening to `EDIT_MODE_LAYOUTS_UPDATED` and reapplying UIParent scale during layout updates, which interfered with Edit Mode’s snapping logic.  
+  This event hook has been removed to ensure Edit Mode behaves normally.  
   
-✅ Enhanced Debug & Control:  
-/ppscale status now shows base, modifier, and resulting scale values.  
-Added proper feedback when enabling/disabling CVar writes (/ppscale cvars on|off).  
-  
-✅ Midnight Beta Compatibility:  
-Confirmed fully compatible with new combat restrictions.  
-Scale updates and CVar writes are safely deferred during combat and re-applied on PLAYER_REGEN_ENABLED.  
-Optional chat message can notify when scale updates are postponed due to combat.  
-  
-✅ Stability & UX:  
-Improved internal validation and clamping for user-set modifiers (range limited to 0.5–3.0).  
-Cleaned up debug output for consistency with retail client logging style.  
+### Notes  
+- This is a minor hotfix release to improve UX while editing UI layouts.   
   
 ⚠️ Known Issues / Notes:  
 UI scale changes are deferred while in combat (intentional for Midnight).  
