@@ -1,5 +1,5 @@
-📜 Changelog – Version 1.3.1a-Beta  
-📅 Release Date: 28-11-2025  
+📜 Changelog – Version 1.3.2  
+📅 Release Date: 05-12-2025  
   
 🛠️ Changes & Improvements:  
   
@@ -9,7 +9,7 @@ Resolved an issue where Edit Mode’s *snap to elements* feature stopped working
   This event hook has been removed to ensure Edit Mode behaves normally.  
   
 ⚠️ Known Issues / Notes:  
-- This is a minor hotfix release to improve UX while editing UI layouts.  
+- Midnight compatible  
   
 🚀 Thank you for using Pixel Perfect UI Scale!  
 If you have suggestions or feature requests, please share them on our Discord or GitHub.  
