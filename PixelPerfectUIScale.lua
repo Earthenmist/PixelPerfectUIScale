@@ -2,6 +2,26 @@
 
 local f = CreateFrame("Frame")
 
+-- Screen height helper (Retail + Classic)
+local function PPScale_GetScreenHeight()
+  -- Prefer physical pixel height when available
+  if type(GetPhysicalScreenSize) == "function" then
+    local _, h = GetPhysicalScreenSize()
+    if h and h > 0 then return h end
+  end
+  -- Classic fallback
+  if type(GetScreenHeight) == "function" then
+    local h = GetScreenHeight()
+    if h and h > 0 then return h end
+  end
+  -- Last resort: approximate from UIParent
+  if UIParent and UIParent.GetHeight and UIParent.GetScale then
+    local h = UIParent:GetHeight() * UIParent:GetScale()
+    if h and h > 0 then return h end
+  end
+  return nil
+end
+
 -- Added modifier support
 PixelPerfectUIScaleDB = PixelPerfectUIScaleDB or {}
 local function getModifier()
@@ -59,7 +79,7 @@ SlashCmdList.PIXELPERFECTUISCALE = function(msg)
     PixelPerfectUIScale_Apply(true)
 
   elseif msg == "status" then
-    local _, h = GetPhysicalScreenSize()
+    local h = PPScale_GetScreenHeight()
     local base = (h and h > 0) and (768 / h) or nil
     local mod  = getModifier()
     local want = base and (base * mod) or nil
@@ -106,7 +126,7 @@ local function isSimilar(a, b)
 end
 
 local function desiredScale()
-  local _, h = GetPhysicalScreenSize()
+  local h = PPScale_GetScreenHeight()
   if not h or h == 0 then return nil end
   return (768 / h) * getModifier()
 end
