@@ -1,13 +1,10 @@
-## Interface: 110207, 120000
+## Interface: 110207, 120000, 120001
 ## Title: PixelPerfectUIScale
 ## Notes: Sets a pixel-perfect UI scale based on physical screen height (768 / height).
 ## Author: Lanni of Alonsus
-## Version: 1.3.2
+## Version: 1.4.0
 ## X-Category: UI
 ## IconTexture: Interface/AddOns/PixelPerfectUIScale/Icon.tga
 ## SavedVariables: PixelPerfectUIScaleDB
 
 PixelPerfectUIScale.lua
-
-
-
