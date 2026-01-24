@@ -3,7 +3,7 @@
 ## Notes: Sets a pixel-perfect UI scale based on physical screen height (768 / height).
 ## Author: Lanni of Alonsus
 ## Version: 1.4.3
-## X-Category: UI
+## Category: Unit Frames
 ## IconTexture: Interface/AddOns/PixelPerfectUIScale/Icon.tga
 ## SavedVariables: PixelPerfectUIScaleDB
 
