@@ -1,3 +1,15 @@
+📜 Changelog – Version 1.4.1  
+  
+📅 Release Date: 24-01-2026  
+  
+🛠️ Changes & Improvements  
+✅ Fixed  
+  
+Nameplates are now excluded from the enforced UIParent scale to prevent unintended shrinking or double-scaling when using nameplate addons (e.g. Platynator).  
+The addon now re-asserts nameplate container scale after applying UI scale and when new nameplates are created.  
+  
+---
+
 📜 Changelog – Version 1.4.0  
   
 📅 Release Date: 14-01-2026  
