@@ -42,9 +42,7 @@ local EVENTS = {
   "PLAYER_LOGIN",
   "PLAYER_ENTERING_WORLD",
   "DISPLAY_SIZE_CHANGED",
-  "UI_SCALE_CHANGED",
-  "NAME_PLATE_CREATED",
-  -- "EDIT_MODE_LAYOUTS_UPDATED", -- disabled: breaks Edit Mode snap-to-elements
+  "UI_SCALE_CHANGED",  -- "EDIT_MODE_LAYOUTS_UPDATED", -- disabled: breaks Edit Mode snap-to-elements
   "PLAYER_REGEN_ENABLED",
 }
 
@@ -148,27 +146,26 @@ end
 -- Nameplates can end up effectively double-scaled when UIParent scale is enforced
 -- and another addon (e.g. nameplate skins) applies its own scaling.
 -- To keep nameplates visually consistent, we reset the nameplate containers to 1.
-local function PPScale_FixNamePlates(plate)
-  if NamePlateDriverFrame and NamePlateDriverFrame.SetScale then
-    NamePlateDriverFrame:SetScale(1)
+-- Nameplates: avoid double-scaling when UIParent scale is enforced.
+-- IMPORTANT: Individual nameplate frames are protected; do NOT call :SetScale() on them.
+-- Instead, tell the nameplate driver to ignore parent scaling and keep it at scale 1.
+local pendingNameplateFix = false
+local function PPScale_FixNamePlates()
+  if type(InCombatLockdown) == "function" and InCombatLockdown() then
+    pendingNameplateFix = true
+    return
   end
 
-  -- If we were given the newly created plate, fix just that first.
-  if plate and plate.SetScale then
-    plate:SetScale(1)
-  end
-
-  -- Re-assert on all active plates (covers existing plates + races)
-  if C_NamePlate and C_NamePlate.GetNamePlates then
-    local plates = C_NamePlate.GetNamePlates()
-    if plates then
-      for _, p in ipairs(plates) do
-        if p and p.SetScale then
-          p:SetScale(1)
-        end
-      end
+  if NamePlateDriverFrame then
+    if NamePlateDriverFrame.SetIgnoreParentScale then
+      NamePlateDriverFrame:SetIgnoreParentScale(true)
+    end
+    if NamePlateDriverFrame.SetScale then
+      NamePlateDriverFrame:SetScale(1)
     end
   end
+
+  pendingNameplateFix = false
 end
 
 function PixelPerfectUIScale_Apply(force)
@@ -246,14 +243,9 @@ end
   end
 end
 
-f:SetScript("OnEvent", function(self, event, ...)
-  if event == "NAME_PLATE_CREATED" then
-    local plate = ...
-    PPScale_FixNamePlates(plate)
-    return
-  end
-  if event == "PLAYER_REGEN_ENABLED" then
+f:SetScript("OnEvent", function(self, event, ...)  if event == "PLAYER_REGEN_ENABLED" then
     if pending then PixelPerfectUIScale_Apply(true) end
+    if pendingNameplateFix then PPScale_FixNamePlates() end
     return
   end
 

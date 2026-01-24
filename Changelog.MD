@@ -1,3 +1,16 @@
+📜 Changelog – Version 1.4.3  
+
+📅 Release Date: 24-01-2026  
+
+🛠️ Changes & Improvements  
+✅ Fixed  
+
+Resolved ADDON_ACTION_BLOCKED errors caused by attempting to call :SetScale() on individual nameplate frames (protected).  
+Nameplates are now excluded safely by setting NamePlateDriverFrame to ignore parent scaling and enforcing scale 1 on the driver container only.  
+Nameplate scale fixes are deferred until after combat when necessary.  
+
+---
+
 📜 Changelog – Version 1.4.1  
   
 📅 Release Date: 24-01-2026  
