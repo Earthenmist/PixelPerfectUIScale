@@ -1,8 +1,8 @@
-## Interface: 11508, 11507, 20505, 30405, 38000, 40402, 50503, 50502
+## Interface: 11508, 20505, 30405, 38000, 40402, 50503
 ## Title: PixelPerfectUIScale
 ## Notes: Sets a pixel-perfect UI scale based on screen height (768 / height).
 ## Author: Lanni of Alonsus
-## Version: 1.4.3
+## Version: 1.4.5
 ## X-Category: UI
 ## IconTexture: Interface/AddOns/PixelPerfectUIScale/Icon.tga
 ## SavedVariables: PixelPerfectUIScaleDB

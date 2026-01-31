@@ -1,3 +1,40 @@
+📜 Changelog – Version 1.4.5  
+  
+📅 Release Date: 30-01-2026  
+  
+🛠️ Changes & Improvements  
+✅ Fixed  
+  
+Improved compatibility with Edit Mode’s Snap to Elements system.  
+Removed automatic enforcement of Blizzard UI scale CVars (useUiScale, uiScale) which could cause snapping inconsistencies during layout adjustments.  
+Stopped listening to UI_SCALE_CHANGED events to prevent unwanted scale reapplication while using Edit Mode.  
+  
+✅ Changes  
+  
+UI scale is now applied more conservatively to prioritise Edit Mode stability.  
+Users can still manually enable CVar enforcement if desired via command:  
+/ppscale cvars on  
+  
+⚠️ Notes  
+  
+CVar enforcement is disabled by default to ensure the best experience when frequently using Edit Mode.  
+  
+📜 Changelog – Version 1.4.4  
+  
+📅 Release Date: 29-01-2026  
+  
+🛠️ Changes & Improvements  
+✅ Fixed  
+  
+Prevented UI scale from being re-applied while Edit Mode is active.  
+Resolved delayed timers that could override scale during layout adjustments.  
+Added safe re-application of UI scale after exiting Edit Mode.  
+  
+✅ Improvements  
+  
+Reduced interference with frame positioning and snapping behaviour.  
+Improved overall stability when opening and closing Edit Mode.  
+  
 📜 Changelog – Version 1.4.3  
 
 📅 Release Date: 24-01-2026  

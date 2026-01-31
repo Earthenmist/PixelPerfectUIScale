@@ -35,14 +35,13 @@ end
 -- Settings
 local THROTTLE_SEC = 0.5
 local TOLERANCE    = 0.02
-local TOUCH_CVARS  = true  -- set to false to avoid writing useUiScale/uiScale
+local TOUCH_CVARS  = false  -- set to false to avoid writing useUiScale/uiScale
 
 -- Events to watch
 local EVENTS = {
   "PLAYER_LOGIN",
   "PLAYER_ENTERING_WORLD",
   "DISPLAY_SIZE_CHANGED",
-  "UI_SCALE_CHANGED",  -- "EDIT_MODE_LAYOUTS_UPDATED", -- disabled: breaks Edit Mode snap-to-elements
   "PLAYER_REGEN_ENABLED",
 }
 
@@ -53,7 +52,10 @@ if C_CVar and C_CVar.RegisterCVarChangedCallback then
   C_CVar.RegisterCVarChangedCallback(function(name)
     if not TOUCH_CVARS then return end
     if name == "uiScale" or name == "useUiScale" then
-      C_Timer.After(0.05, function() PixelPerfectUIScale_Apply(true) end)
+      C_Timer.After(0.05, function()
+        if IsEditModeActive() then pending = true return end
+        PixelPerfectUIScale_Apply(true)
+      end)
     end
   end, "PixelPerfectUIScale")
 end
@@ -102,7 +104,7 @@ SlashCmdList.PIXELPERFECTUISCALE = function(msg)
     end
 
   elseif msg == "cvars on" then
-    TOUCH_CVARS = true
+    TOUCH_CVARS  = false
     print("PPScale: TOUCH_CVARS set to ON.")
 
   elseif msg == "cvars off" then
@@ -133,6 +135,7 @@ end
 local throttleUntil = 0
 local pending = false
 
+
 local function IsEditModeActive()
   if EditModeManagerFrame and EditModeManagerFrame.editModeActive then
     return EditModeManagerFrame.editModeActive
@@ -143,12 +146,35 @@ local function IsEditModeActive()
   return false
 end
 
+-- When Edit Mode is active, scale changes can break "snap to elements".
+-- We therefore (1) block all delayed re-asserts while Edit Mode is active and
+-- (2) re-apply once immediately after leaving Edit Mode.
+if EditModeManagerFrame and hooksecurefunc then
+  if not PixelPerfectUIScale_EditModeHooked then
+    PixelPerfectUIScale_EditModeHooked = true
+    hooksecurefunc(EditModeManagerFrame, "EnterEditMode", function()
+      pending = true
+      dprint("Entered Edit Mode; blocking scale applies")
+    end)
+    hooksecurefunc(EditModeManagerFrame, "ExitEditMode", function()
+      C_Timer.After(0.10, function()
+        if not IsEditModeActive() then
+          dprint("Exited Edit Mode; re-applying scale")
+          PixelPerfectUIScale_Apply(true)
+        end
+      end)
+    end)
+  end
+end
+
+
 -- Nameplates can end up effectively double-scaled when UIParent scale is enforced
 -- and another addon (e.g. nameplate skins) applies its own scaling.
 -- To keep nameplates visually consistent, we reset the nameplate containers to 1.
 -- Nameplates: avoid double-scaling when UIParent scale is enforced.
 -- IMPORTANT: Individual nameplate frames are protected; do NOT call :SetScale() on them.
 -- Instead, tell the nameplate driver to ignore parent scaling and keep it at scale 1.
+
 local pendingNameplateFix = false
 local function PPScale_FixNamePlates()
   if type(InCombatLockdown) == "function" and InCombatLockdown() then
@@ -167,6 +193,27 @@ local function PPScale_FixNamePlates()
 
   pendingNameplateFix = false
 end
+
+
+local function PPScale_TrySetScale(want, reason)
+  -- Never touch scale while Edit Mode is active (breaks snap-to-elements)
+  if IsEditModeActive() then
+    dprint("Blocked scale apply (%s): Edit Mode active", reason or "unknown")
+    pending = true
+    return false
+  end
+  if type(InCombatLockdown) == "function" and InCombatLockdown() then
+    dprint("Blocked scale apply (%s): in combat", reason or "unknown")
+    pending = true
+    return false
+  end
+
+  UIParent:SetScale(want)
+  PPScale_FixNamePlates()
+  return true
+end
+
+
 
 function PixelPerfectUIScale_Apply(force)
   pending = false
@@ -211,30 +258,26 @@ end
   -- Apply to UIParent (and re-assert a couple of times to beat races)
   local current = UIParent:GetScale()
   if force or not isSimilar(current, want) then
-    UIParent:SetScale(want)
-    PPScale_FixNamePlates()
+    PPScale_TrySetScale(want, "apply")
     dprint("Applied UIParent:SetScale(%.5f) (was %.5f)", want, current or -1)
 
     C_Timer.After(0.25, function()
       if not isSimilar(UIParent:GetScale(), want) then
-        UIParent:SetScale(want)
-        PPScale_FixNamePlates()
+        PPScale_TrySetScale(want, "reapply")
         dprint("Re-applied after 0.25s; now %.5f", UIParent:GetScale())
       end
     end)
 
     C_Timer.After(0.75, function()
       if not isSimilar(UIParent:GetScale(), want) then
-        UIParent:SetScale(want)
-        PPScale_FixNamePlates()
+        PPScale_TrySetScale(want, "reapply")
         dprint("Re-applied after 0.75s; now %.5f", UIParent:GetScale())
       end
     end)
 
     C_Timer.After(1.25, function()
       if not isSimilar(UIParent:GetScale(), want) then
-        UIParent:SetScale(want)
-        PPScale_FixNamePlates()
+        PPScale_TrySetScale(want, "reapply")
         dprint("Re-applied after 1.25s; now %.5f", UIParent:GetScale())
       end
     end)
