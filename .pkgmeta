@@ -3,6 +3,7 @@ package-as: PixelPerfectUIScale
 manual-changelog: CHANGELOG.md
 
 ignore:
+  - .github
   - README.md
   - CHANGELOG.md
   - CHANGES.txt
