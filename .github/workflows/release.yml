@@ -19,11 +19,51 @@ jobs:
       - name: Package and Upload (CurseForge / Wago / GitHub Releases)
         uses: BigWigsMods/packager@v2
         env:
-          # CurseForge upload (optional per repo: requires secret + X-Curse-Project-ID in .toc)
           CF_API_KEY: ${{ secrets.CF_API_KEY }}
-
-          # Wago upload (optional per repo: requires secret + X-Wago-ID in .toc)
           WAGO_API_TOKEN: ${{ secrets.WAGO_API_TOKEN }}
-
-          # GitHub release asset upload
           GITHUB_OAUTH: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Post release announcement to Discord (no embeds)
+        if: success()
+        shell: bash
+        env:
+          DISCORD_WEBHOOK_RELEASE: ${{ secrets.DISCORD_WEBHOOK_RELEASE }}
+        run: |
+          set -euo pipefail
+
+          TAG="${GITHUB_REF_NAME}"
+          REPO="${GITHUB_REPOSITORY}"
+          URL="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/releases/tag/${GITHUB_REF_NAME}"
+
+          # Keep short to avoid Discord limits
+          BODY="$(head -n 40 CHANGELOG.md 2>/dev/null || true)"
+
+          export TAG REPO URL BODY
+
+          python3 - << 'PY' > payload.json
+          import json, os
+          tag=os.environ.get("TAG","").strip()
+          repo=os.environ.get("REPO","").strip()
+          url=os.environ.get("URL","").strip()
+          body=os.environ.get("BODY","").strip()
+
+          msg = (
+            f"## 🚀 Addon Release: {tag}
+"
+            f"**Repo:** {repo}
+"
+            f"✅ Published to **CurseForge** + **Wago**
+"
+            f"**GitHub:** <{url}>
+
+"
+            f"{body}"
+          ).strip()
+
+          print(json.dumps({
+            "content": msg,
+            "flags": 4  # SUPPRESS_EMBEDS
+          }))
+          PY
+
+          curl -sS -H "Content-Type: application/json"             --data-binary @payload.json             "${DISCORD_WEBHOOK_RELEASE}"
