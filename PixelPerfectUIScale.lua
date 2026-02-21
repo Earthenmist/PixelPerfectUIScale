@@ -104,7 +104,7 @@ SlashCmdList.PIXELPERFECTUISCALE = function(msg)
     end
 
   elseif msg == "cvars on" then
-    TOUCH_CVARS  = false
+    TOUCH_CVARS = true
     print("PPScale: TOUCH_CVARS set to ON.")
 
   elseif msg == "cvars off" then
@@ -301,6 +301,3 @@ f:SetScript("OnEvent", function(self, event, ...)  if event == "PLAYER_REGEN_ENA
     PixelPerfectUIScale_Apply(false)
   end)
 end)
-
-
-
