@@ -3,10 +3,10 @@
 **PixelPerfectUIScale** — v1.4.6  
 
 **Changes:**  
-• Release packaging update (standardised changelog + cleaner zip output).  
+• None.  
 
 **Fixes:**  
-• None.
+• Merge pull request #3 from rivengh/fix-cvars-on - Fix Cvars on Command
 
 **Known issues:**  
 • None currently known.
