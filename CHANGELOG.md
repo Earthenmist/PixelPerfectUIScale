@@ -1,6 +1,6 @@
-## 🧩 Addon Updates (2026-02-09)
+## 🧩 Addon Updates (2026-02-21)
 
-**PixelPerfectUIScale** — v1.4.6  
+**PixelPerfectUIScale** — v1.4.7  
 
 **Changes:**  
 • None.  
