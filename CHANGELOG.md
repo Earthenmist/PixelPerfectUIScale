@@ -1,12 +1,12 @@
-## 🧩 Addon Updates (2026-02-21)
+## 🧩 Addon Updates (2026-04-21)
 
-**PixelPerfectUIScale** — v1.4.7  
+**PixelPerfectUIScale** — v1.4.8  
 
 **Changes:**  
-• None.  
+• Updated toc for WoW 12.0.5 patch release  
 
 **Fixes:**  
-• Merge pull request #3 from rivengh/fix-cvars-on - Fix Cvars on Command
+• None.
 
 **Known issues:**  
 • None currently known.
