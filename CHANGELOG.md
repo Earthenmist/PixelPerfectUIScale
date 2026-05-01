@@ -1,9 +1,9 @@
-## 🧩 Addon Updates (2026-04-21)
+## 🧩 Addon Updates (2026-05-01)
 
-**PixelPerfectUIScale** — v1.4.8  
+**PixelPerfectUIScale** — v1.4.11  
 
 **Changes:**  
-• Updated toc for WoW 12.0.5 patch release  
+• Added a settings panel in Options > Addons > PixelPerfectUIScale to make settings easier to change.   
 
 **Fixes:**  
 • None.
