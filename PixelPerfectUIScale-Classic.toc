@@ -2,7 +2,7 @@
 ## Title: PixelPerfectUIScale
 ## Notes: Sets a pixel-perfect UI scale based on screen height (768 / height).
 ## Author: Lanni of Alonsus
-## Version: 1.4.8
+## Version: 1.4.11
 ## X-Curse-Project-ID: 1358178
 ## X-Wago-ID: YK9bBaGL
 ## X-Category: UI
