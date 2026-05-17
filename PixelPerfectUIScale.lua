@@ -1,5 +1,5 @@
 -- Enforces a pixel-perfect UI scale (768 / physical screen height).
--- v1.4.11: Fixes value edit boxes stealing clicks from the nearby sliders.
+-- v1.4.12: Safely skips Retail Edit Mode hooks when running on Classic clients.
 
 local ADDON_NAME = ...
 local f = CreateFrame("Frame")
@@ -250,22 +250,41 @@ function PixelPerfectUIScale_Apply(force)
 end
 
 local function HookEditMode()
-  if not EditModeManagerFrame or not hooksecurefunc or PixelPerfectUIScale_EditModeHooked then return end
-  PixelPerfectUIScale_EditModeHooked = true
+  if PixelPerfectUIScale_EditModeHooked or not hooksecurefunc then return end
 
-  hooksecurefunc(EditModeManagerFrame, "EnterEditMode", function()
-    pending = true
-    dprint("Entered Edit Mode; blocking scale applies")
-  end)
+  local editModeFrame = EditModeManagerFrame
+  if not editModeFrame then return end
 
-  hooksecurefunc(EditModeManagerFrame, "ExitEditMode", function()
-    C_Timer.After(0.10, function()
-      if not IsEditModeActive() then
-        dprint("Exited Edit Mode; re-applying scale")
-        PixelPerfectUIScale_Apply(true)
-      end
+  local hasEnterEditMode = type(editModeFrame.EnterEditMode) == "function"
+  local hasExitEditMode  = type(editModeFrame.ExitEditMode) == "function"
+
+  -- Classic clients can expose EditModeManagerFrame without the Retail Edit Mode
+  -- methods. hooksecurefunc errors if asked to hook a missing function, so skip
+  -- these hooks unless the methods are actually available.
+  if not hasEnterEditMode and not hasExitEditMode then
+    dprint("Edit Mode hooks skipped: EnterEditMode/ExitEditMode unavailable")
+    return
+  end
+
+  if hasEnterEditMode then
+    hooksecurefunc(editModeFrame, "EnterEditMode", function()
+      pending = true
+      dprint("Entered Edit Mode; blocking scale applies")
     end)
-  end)
+  end
+
+  if hasExitEditMode then
+    hooksecurefunc(editModeFrame, "ExitEditMode", function()
+      C_Timer.After(0.10, function()
+        if not IsEditModeActive() then
+          dprint("Exited Edit Mode; re-applying scale")
+          PixelPerfectUIScale_Apply(true)
+        end
+      end)
+    end)
+  end
+
+  PixelPerfectUIScale_EditModeHooked = true
 end
 
 if C_CVar and C_CVar.RegisterCVarChangedCallback then
