@@ -1,12 +1,12 @@
-## 🧩 Addon Updates (2026-05-17)
+## 🧩 Addon Updates (2026-06-12)
 
-**PixelPerfectUIScale** — v1.4.12  
+**PixelPerfectUIScale** — v1.4.13  
 
 **Changes:**  
-• None.   
+• Updated for the upcoming 12.0.7 release.   
 
 **Fixes:**  
-• Fix LUA error on classic for editmode. Classic exposes EditModeManagerFrame, but not EnterEditMode, so the addon was trying to hook a missing Retail-only function. Addon now checks the method exists before hooking it.
+• None.
 
 **Known issues:**  
 • None currently known.
