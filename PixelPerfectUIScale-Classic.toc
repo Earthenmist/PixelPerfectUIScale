@@ -1,4 +1,4 @@
-## Interface: 11508, 20505, 30405, 38000, 40402, 50503
+## Interface: 11509, 20506, 30405, 38002, 40402, 50504
 ## Title: PixelPerfectUIScale
 ## Notes: Sets a pixel-perfect UI scale based on screen height (768 / height).
 ## Author: Lanni of Alonsus
