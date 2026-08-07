@@ -11,6 +11,8 @@ local TOUCH_CVARS  = true -- Keep Blizzard's saved UI scale in sync so /reload d
 local pending = false
 local pendingNameplateFix = false
 local throttleUntil = 0
+local deferredNoticeShown = false
+local startupRetryToken = 0
 
 PixelPerfectUIScale_Debug = PixelPerfectUIScale_Debug or false
 PixelPerfectUIScaleDB = PixelPerfectUIScaleDB or {}
@@ -196,6 +198,7 @@ local function TrySetScale(want, reason)
   ResizeUIParentForMonitorMode()
   FixNamePlates()
   ApplyGameMenuScale()
+  deferredNoticeShown = false
   return true
 end
 
@@ -210,11 +213,14 @@ function PixelPerfectUIScale_Apply(force)
 
   if InCombatLockdown and InCombatLockdown() then
     pending = true
-    if DEFAULT_CHAT_FRAME and DEFAULT_CHAT_FRAME.AddMessage then
+    if not deferredNoticeShown and DEFAULT_CHAT_FRAME and DEFAULT_CHAT_FRAME.AddMessage then
       DEFAULT_CHAT_FRAME:AddMessage("|cffff7f00[PPScale]|r UI scale update deferred until after combat.")
+      deferredNoticeShown = true
     end
     return
   end
+
+  deferredNoticeShown = false
 
   local want = DesiredScale()
   if not want then
@@ -246,6 +252,28 @@ function PixelPerfectUIScale_Apply(force)
     ResizeUIParentForMonitorMode()
     ApplyGameMenuScale()
     dprint("Scale within tolerance (want %.5f, have %.5f)", want, current)
+  end
+end
+
+local function ScheduleStartupRetries(reason)
+  if not C_Timer or not C_Timer.After then return end
+
+  startupRetryToken = startupRetryToken + 1
+  local token = startupRetryToken
+
+  for _, delay in ipairs({0.05, 0.25, 0.75, 1.25, 2.5, 5, 10, 15}) do
+    C_Timer.After(delay, function()
+      if token ~= startupRetryToken then return end
+
+      if IsEditModeActive() or (InCombatLockdown and InCombatLockdown()) then
+        pending = true
+        dprint("Startup retry blocked (%s): unsafe at %.2fs", reason or "unknown", delay)
+        return
+      end
+
+      PixelPerfectUIScale_Apply(true)
+      dprint("Startup retry applied (%s) at %.2fs", reason or "unknown", delay)
+    end)
   end
 end
 
@@ -579,12 +607,17 @@ f:SetScript("OnEvent", function(_, event)
     CopyDefaults()
     HookEditMode()
     BuildSettingsPanel()
+    ScheduleStartupRetries("login")
   end
 
   if event == "PLAYER_REGEN_ENABLED" then
     if pending then PixelPerfectUIScale_Apply(true) end
     if pendingNameplateFix then FixNamePlates() end
     return
+  end
+
+  if event == "PLAYER_ENTERING_WORLD" then
+    ScheduleStartupRetries("entering world")
   end
 
   local now = GetTime and GetTime() or 0
